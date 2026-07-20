@@ -1,0 +1,101 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           Int      @id @default(autoincrement())
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  name         String
+  role         String   @default("admin")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @default(now()) @map("updated_at")
+}
+
+model Breed {
+  id              Int      @id @default(autoincrement())
+  name            String
+  description     String?
+  characteristics String?
+  colors          String?
+  patterns        String?
+  temperament     String?
+  size            String?
+  lifespan        String?
+  imageUrl        String?  @map("image_url")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @default(now()) @map("updated_at")
+  kittens         Kitten[]
+}
+
+model Kitten {
+  id            Int       @id @default(autoincrement())
+  name          String
+  breedId       Int?      @map("breed_id")
+  breed         Breed?    @relation(fields: [breedId], references: [id])
+  gender        String
+  ageWeeks      Int?      @map("age_weeks")
+  color         String?
+  price         Decimal?  @db.Decimal(10, 2)
+  description   String?
+  healthRecords String?   @map("health_records")
+  images        String[]
+  status        String    @default("available")
+  featured      Boolean   @default(false)
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @default(now()) @map("updated_at")
+  inquiries     Inquiry[]
+}
+
+model Testimonial {
+  id           Int      @id @default(autoincrement())
+  customerName String   @map("customer_name")
+  rating       Int
+  comment      String
+  status       String   @default("pending")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @default(now()) @map("updated_at")
+}
+
+model Inquiry {
+  id           Int      @id @default(autoincrement())
+  customerName String   @map("customer_name")
+  email        String
+  phone        String?
+  message      String
+  kittenId     Int?     @map("kitten_id")
+  kitten       Kitten?  @relation(fields: [kittenId], references: [id])
+  status       String   @default("new")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @default(now()) @map("updated_at")
+}
+
+model SiteSetting {
+  id        Int      @id @default(autoincrement())
+  key       String   @unique
+  value     String?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @map("updated_at")
+}
+
+model Notification {
+  id        Int      @id @default(autoincrement())
+  type      String
+  title     String
+  message   String?
+  priority  String   @default("normal")
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now()) @map("created_at")
+}

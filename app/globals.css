@@ -1,0 +1,119 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Hide browser extension attributes that cause hydration mismatches */
+[bis_skin_checked] {
+  /* This won't prevent the attribute but helps with visual consistency */
+}
+
+/* Ensure consistent rendering */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  /* Will be overridden by Next font in layout, but fallback here */
+  font-family: system-ui, -apple-system, sans-serif;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+  
+  /* Glassmorphism utilities */
+  .glass {
+    @apply bg-white/40 backdrop-blur-md border border-white/20 shadow-[0_8px_32px_0_rgba(31,38,135,0.07)];
+  }
+  .dark .glass {
+    @apply bg-black/40 backdrop-blur-md border border-white/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.3)];
+  }
+  
+  .glass-card {
+    @apply bg-white/60 backdrop-blur-xl border border-white/50 shadow-xl;
+  }
+  .dark .glass-card {
+    @apply bg-slate-900/60 backdrop-blur-xl border border-white/10 shadow-xl shadow-black/50;
+  }
+  
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-amber-500 to-yellow-500;
+  }
+  .dark .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-amber-400 to-yellow-400;
+  }
+}
+
+@layer base {
+  :root {
+    /* Light Theme - Soft, bright, premium */
+    --background: 240 20% 98%; /* Very soft off-white/indigo tint */
+    --foreground: 240 10% 15%; /* Soft black */
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 15%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 15%;
+    
+    /* Vibrant Gold/Amber for primary */
+    --primary: 45 93% 47%; 
+    --primary-foreground: 0 0% 100%;
+    
+    --secondary: 240 5% 90%;
+    --secondary-foreground: 240 10% 20%;
+    
+    --muted: 240 5% 92%;
+    --muted-foreground: 240 5% 45%;
+    
+    --accent: 45 93% 96%; /* Very light gold */
+    --accent-foreground: 45 93% 30%;
+    
+    --destructive: 348 83% 58%;
+    --destructive-foreground: 210 40% 98%;
+    
+    --border: 240 6% 85%;
+    --input: 240 6% 85%;
+    --ring: 45 93% 47%;
+    
+    --radius: 1rem;
+  }
+
+  .dark {
+    /* Dark Theme - Deep midnight with vibrant accents */
+    --background: 240 10% 4%; /* Very dark midnight */
+    --foreground: 210 20% 96%; /* Off-white text */
+    --card: 240 10% 6%;
+    --card-foreground: 210 20% 96%;
+    --popover: 240 10% 6%;
+    --popover-foreground: 210 20% 96%;
+    
+    --primary: 45 93% 55%; /* Slightly brighter gold for dark mode */
+    --primary-foreground: 240 10% 10%;
+    
+    --secondary: 240 5% 15%;
+    --secondary-foreground: 210 20% 96%;
+    
+    --muted: 240 5% 12%;
+    --muted-foreground: 240 5% 65%;
+    
+    --accent: 240 5% 15%;
+    --accent-foreground: 45 93% 65%;
+    
+    --destructive: 348 83% 50%;
+    --destructive-foreground: 210 40% 98%;
+    
+    --border: 240 5% 20%;
+    --input: 240 5% 20%;
+    --ring: 45 93% 55%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
