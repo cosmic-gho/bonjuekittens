@@ -7,20 +7,26 @@ cloudinary.config({
 });
 
 export async function POST(req: Request) {
-  const data = await req.formData();
-  const file = data.get("file") as File;
-  if (!file) {
-    return new Response("No file uploaded", { status: 400 });
+  try {
+    const data = await req.formData();
+    const file = data.get("file") as File;
+    if (!file) {
+      return Response.json({ error: "No file uploaded" }, { status: 400 });
+    }
+    
+    const arrayBuffer = await file.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+    const b64 = buffer.toString("base64");
+    const mimeType = file.type || "image/jpeg";
+    const dataURI = `data:${mimeType};base64,${b64}`;
+
+    const result = await cloudinary.uploader.upload(dataURI, {
+      folder: "bonjuekittens",
+    });
+
+    return Response.json(result);
+  } catch (error: any) {
+    console.error("Upload route error:", error);
+    return Response.json({ error: error.message || "Failed to upload" }, { status: 500 });
   }
-  const arrayBuffer = await file.arrayBuffer();
-  const buffer = Buffer.from(arrayBuffer);
-
-  const result = await new Promise((resolve, reject) => {
-    cloudinary.uploader.upload_stream({}, (error, result) => {
-      if (error) reject(error);
-      else resolve(result);
-    }).end(buffer);
-  });
-
-  return Response.json(result);
 } 

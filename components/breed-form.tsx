@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -38,15 +38,29 @@ export default function BreedForm({ initialData, onSave, onClose }: any) {
     onSave(data);
   };
 
+  const [isUploading, setIsUploading] = useState(false);
+
   async function handleFileChange(e: any) {
     const file = e.target.files[0];
     if (!file) return;
     const formData = new FormData();
     formData.append("file", file);
-    const res = await fetch("/api/upload", { method: "POST", body: formData });
-    const data = await res.json();
-    if (data.secure_url) {
-      setValue("imageUrl", data.secure_url);
+    setIsUploading(true);
+    try {
+      const res = await fetch("/api/upload", { method: "POST", body: formData });
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.error || "Upload failed");
+      }
+      const data = await res.json();
+      if (data.secure_url) {
+        setValue("imageUrl", data.secure_url);
+      }
+    } catch (error: any) {
+      console.error("Upload error:", error);
+      alert(error.message || "Failed to upload image");
+    } finally {
+      setIsUploading(false);
     }
   }
 
@@ -86,7 +100,8 @@ export default function BreedForm({ initialData, onSave, onClose }: any) {
       </div>
       <div>
         <label className="block mb-1 font-medium">Image Upload</label>
-        <input type="file" accept="image/*" ref={fileInputRef} onChange={handleFileChange} />
+        <input type="file" accept="image/*" ref={fileInputRef} onChange={handleFileChange} disabled={isUploading} />
+        {isUploading && <p className="text-sm text-muted-foreground mt-1 animate-pulse">Uploading...</p>}
         {watch("imageUrl") && typeof watch("imageUrl") === "string" && watch("imageUrl").trim() && (
           <img src={watch("imageUrl")} alt="Preview" className="mt-2 w-32 h-32 object-cover rounded" />
         )}
