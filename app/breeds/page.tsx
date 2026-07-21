@@ -10,6 +10,9 @@ export const metadata = {
   description: 'Learn about the different kitten breeds we offer, including their temperaments, characteristics, and lifespan.',
 }
 
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 export default async function BreedsPage() {
   // Fetch breeds directly on the server
   const breeds = await prisma.breed.findMany({
