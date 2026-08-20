@@ -54,7 +54,7 @@ export function HeroImageSlider() {
         </h1>
         
         <p className="text-xl md:text-2xl text-gray-200 leading-relaxed max-w-2xl mx-auto font-light mb-10 drop-shadow-lg">
-          Discover beautiful, healthy kittens from our premium breeding program. Specializing in <span className="text-white font-medium">Persian</span>, <span className="text-white font-medium">Maine Coon</span>, and <span className="text-white font-medium">Ragdoll</span> breeds.
+          Discover beautiful, healthy kittens from our premium breeding program. Specializing in <span className="text-white font-medium">Persian</span>, <span className="text-white font-medium">British</span>, and <span className="text-white font-medium">Exotic</span> breeds only.
         </p>
 
         <div className="flex flex-col sm:flex-row gap-5 justify-center">
