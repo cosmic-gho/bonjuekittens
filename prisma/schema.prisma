@@ -80,6 +80,7 @@ model Inquiry {
   hasPets            String?  @map("has_pets")
   purchaseTimeline   String?  @map("purchase_timeline")
   message            String
+  kittenName         String?  @map("kitten_name")
   kittenId           Int?     @map("kitten_id")
   kitten             Kitten?  @relation(fields: [kittenId], references: [id])
   status             String   @default("new")

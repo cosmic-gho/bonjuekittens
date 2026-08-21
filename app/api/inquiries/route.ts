@@ -1,9 +1,5 @@
 import { NextRequest } from 'next/server';
 import prisma from '@/lib/prisma';
-import { sendInquiryNotification } from '@/lib/email';
-import { sendSimpleEmail } from '@/lib/simple-email';
-import { sendEmailWebhook } from '@/lib/email-webhook';
-import { sendEmailService } from '@/lib/email-service';
 import { sendRealEmail } from '@/lib/real-email';
 import { sendEmailBackup } from '@/lib/email-backup';
 
@@ -23,7 +19,7 @@ export async function POST(req: NextRequest) {
   try {
     const data = await req.json();
     console.log('Received inquiry data:', data);
-    
+
     // Log inquiry details to console for admin review
     console.log('=== NEW INQUIRY RECEIVED ===');
     console.log('Customer Name:', data.customerName);
@@ -36,33 +32,45 @@ export async function POST(req: NextRequest) {
     console.log('Interested Kitten:', data.kittenName || 'Not specified');
     console.log('Message:', data.message);
     console.log('===========================');
-    
+
     let savedInquiry = null;
-    
+
+    // Explicitly pick only known DB fields to avoid Prisma unknown-field errors
+    const dbData = {
+      customerName: data.customerName,
+      email: data.email,
+      phone: data.phone || null,
+      state: data.state || null,
+      city: data.city || null,
+      breedingIntentions: data.breedingIntentions || null,
+      hasPets: data.hasPets || null,
+      purchaseTimeline: data.purchaseTimeline || null,
+      kittenName: data.kittenName || null,
+      message: data.message,
+      status: data.status || 'new',
+      ...(data.kittenId ? { kittenId: parseInt(data.kittenId) } : {}),
+    };
+
     // Try to save to database first
     try {
       console.log('Attempting to save inquiry to database...');
-      
-      // Remove kittenName from data as it's not a database field
-      const { kittenName, ...dbData } = data;
       console.log('Data being saved:', JSON.stringify(dbData, null, 2));
-      
-      savedInquiry = await prisma.inquiry.create({ 
+
+      savedInquiry = await prisma.inquiry.create({
         data: dbData,
         include: { kitten: true }
       });
       console.log('Inquiry saved to database with ID:', savedInquiry.id);
     } catch (dbError) {
       console.error('Failed to save inquiry to database:');
-      console.error('Error type:', typeof dbError);
       console.error('Error message:', dbError instanceof Error ? dbError.message : 'Unknown error');
       console.error('Error details:', dbError);
       console.warn('Continuing with email notification despite database error...');
     }
-    
+
     // Try to send real email notification with backup
     let emailSent = false;
-    
+
     try {
       console.log('Attempting to send real email notification...');
       const emailResult = await sendRealEmail({
@@ -77,7 +85,7 @@ export async function POST(req: NextRequest) {
         message: data.message,
         kittenName: data.kittenName || undefined,
       });
-      
+
       if (emailResult.success) {
         console.log('✅ Real email notification sent successfully!');
         emailSent = true;
@@ -87,7 +95,7 @@ export async function POST(req: NextRequest) {
     } catch (emailError) {
       console.warn('❌ Real email failed:', emailError);
     }
-    
+
     // Use backup method if SMTP failed
     if (!emailSent) {
       try {
@@ -104,7 +112,7 @@ export async function POST(req: NextRequest) {
           message: data.message,
           kittenName: data.kittenName || undefined,
         });
-        
+
         if (backupResult.success) {
           console.log('✅ Backup email notification sent successfully!');
         } else {
@@ -116,26 +124,26 @@ export async function POST(req: NextRequest) {
     }
 
     // Return success response
-    return Response.json({ 
-      success: true, 
+    return Response.json({
+      success: true,
       message: 'Inquiry received successfully. We will contact you soon!',
       saved: !!savedInquiry,
       inquiryId: savedInquiry?.id || null
     });
-    
+
   } catch (error: any) {
     console.error('Error processing inquiry:', error);
-    
+
     // Provide more specific error information
     let errorMessage = 'Error processing inquiry';
     if (error instanceof Error) {
       errorMessage = error.message;
     }
-    
-    return new Response(JSON.stringify({ 
+
+    return new Response(JSON.stringify({
       error: errorMessage,
       details: error instanceof Error ? error.stack : 'Unknown error'
-    }), { 
+    }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' }
     });
