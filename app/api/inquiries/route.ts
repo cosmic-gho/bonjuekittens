@@ -11,7 +11,8 @@ export async function GET(req: NextRequest) {
     });
     return Response.json(inquiries);
   } catch (error: any) {
-    return new Response('Error fetching inquiries', { status: 500 });
+    console.error('Error fetching inquiries:', error);
+    return Response.json({ error: 'Error fetching inquiries', message: error?.message }, { status: 500 });
   }
 }
 

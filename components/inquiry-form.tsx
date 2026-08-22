@@ -39,7 +39,8 @@ export default function InquiryForm({ initialData, kittens, onSave, onClose }: a
   }, [initialData, reset]);
 
   const onSubmit = (data: any) => {
-    onSave({ ...data, kittenId: data.kittenId ? parseInt(data.kittenId) : null });
+    const kittenId = data.kittenId && data.kittenId !== "none" ? parseInt(data.kittenId) : null;
+    onSave({ ...data, kittenId });
   };
 
   return (
@@ -56,7 +57,7 @@ export default function InquiryForm({ initialData, kittens, onSave, onClose }: a
         <label className="block mb-1 font-medium">Phone</label>
         <Input {...register("phone")} />
       </div>
-      
+
       {/* Location Fields */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
@@ -122,12 +123,12 @@ export default function InquiryForm({ initialData, kittens, onSave, onClose }: a
       </div>
       <div>
         <label className="block mb-1 font-medium">Kitten</label>
-        <Select value={watch("kittenId")} onValueChange={val => setValue("kittenId", val)}>
+        <Select value={watch("kittenId") || "none"} onValueChange={val => setValue("kittenId", val === "none" ? "" : val)}>
           <SelectTrigger>
             <SelectValue placeholder="Select kitten" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">None</SelectItem>
+            <SelectItem value="none">None</SelectItem>
             {kittens?.map((kitten: any) => (
               <SelectItem key={kitten.id} value={kitten.id.toString()}>{kitten.name}</SelectItem>
             ))}
